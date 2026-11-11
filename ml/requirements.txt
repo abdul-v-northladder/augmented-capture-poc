@@ -1,0 +1,8 @@
+# Tested with Python 3.9 on macOS (Apple Silicon). Python 3.9-3.12 should work.
+ultralytics==8.4.202     # checkpoint download + ONNX export (AGPL-3.0, see ml/README.md)
+onnx==1.19.1
+onnxruntime==1.19.2
+onnxslim==0.1.99
+numpy==1.26.4
+pillow==11.3.0
+opencv-python==4.11.0.86 # only used by evaluate_segmentation.py (already pulled in by ultralytics)

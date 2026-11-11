@@ -1,0 +1,17 @@
+# Dataset definition for fine-tuning (Ultralytics format). Copy to ml/training/data.yaml and edit `path`.
+#
+#   <path>/images/train/*.jpg   <path>/labels/train/*.txt      (one .txt per image; empty file = no objects)
+#   <path>/images/val/*.jpg     <path>/labels/val/*.txt
+#
+# Label file lines:  <class_id> <x_center> <y_center> <width> <height>   (all normalised 0-1)
+path: ../datasets/phones          # relative to this file; git-ignored
+train: images/train
+val: images/val
+
+# Two classes only. `phone` covers normal phones AND flip phones (open or closed).
+# `phone_case` is the hard negative: label covers/cases that have NO phone in them so the model learns the
+# difference. The app keeps only `phone` and (via other-class suppression) drops a phone box that `phone_case`
+# explains better.
+names:
+  0: phone
+  1: phone_case

@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+# Weights and exported graphs are reproducible with scripts/export_model.py (and are 5-11 MB each).
+models/*.pt
+models/*.onnx
+models/*.onnx.data
+datasets/eval/*/*
+!datasets/eval/*/.gitkeep
+training/runs/
+training/data.yaml
+datasets/phones/
