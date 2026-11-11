@@ -58,7 +58,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "ml:setup": "node scripts/setup-ml-assets.js",
+    "ml:export": "node scripts/export-ml-model.js",
+    "ml:setup":"node scripts/setup-ml-assets.js",
     "postinstall": "patch-package"
   },
   "private": true

@@ -4,6 +4,7 @@ A mobile app that uses the live camera to detect a mobile phone, checks that it 
 
 - **Model:** YOLO26n (Ultralytics, COCO-pretrained, `cell phone` class), exported to ONNX (~10 MB, 640×640 input). No custom training yet.
 - **Stack:** Expo SDK 58, React Native 0.88, Expo Router, `react-native-vision-camera` 4, `onnxruntime-react-native`, `react-native-svg`.
+- **Status:** tested on Android. iOS code paths exist but are untested. Web support exists in the code but is not covered here.
 
 ## Setup
 
@@ -28,12 +29,15 @@ npm install
 The `.onnx` / `.pt` files are git-ignored, so create them once:
 
 ```bash
-cd ml
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python scripts/export_model.py        # writes ml/models/yolo26n.onnx
-cd ..
-npm run ml:setup                      # copies it to assets/models/yolo26n.onnx
+npm run ml:export     # creates ml/.venv, installs requirements, writes ml/models/yolo26n.onnx (needs internet)
+npm run ml:setup      # copies it to assets/models/yolo26n.onnx
+```
+
+Run `ml:export` first; `ml:setup` fails with "Missing ml/models/yolo26n.onnx" if the model does not exist yet. Manual equivalent of `ml:export`:
+
+```bash
+cd ml && python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && python scripts/export_model.py
 ```
 
 Re-run `npm run ml:setup` whenever the model is re-exported. If `assets/models/yolo26n.onnx` is missing, Metro fails with "Unable to resolve module …yolo26n.onnx".

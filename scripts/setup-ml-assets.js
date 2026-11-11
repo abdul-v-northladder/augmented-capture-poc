@@ -16,7 +16,9 @@ const copy = (from, to) => {
 const model = path.join(root, 'ml/models/yolo26n.onnx');
 if (!fs.existsSync(model)) {
   console.error(
-    'Missing ml/models/yolo26n.onnx. Create it first:\n' +
+    'Missing ml/models/yolo26n.onnx (it is git-ignored). Create it first:\n' +
+      '  npm run ml:export\n' +
+      'or manually:\n' +
       '  cd ml && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt\n' +
       '  python scripts/export_model.py',
   );
