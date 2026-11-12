@@ -20,6 +20,13 @@ export function VisionCameraCore({ device, isActive, onReady, onError, ref, fram
   useImperativeHandle(
     ref,
     (): CameraHandle => ({
+      focus: async (point) => {
+        try {
+          await cameraRef.current?.focus(point);
+        } catch {
+          // Unsupported (some front cameras) or interrupted: capture just uses the current focus.
+        }
+      },
       takePhoto: async () => {
         if (!cameraRef.current || !readyRef.current) throw new Error('Camera is not ready yet.');
         const photo = await cameraRef.current.takePhoto({ enableShutterSound: true });

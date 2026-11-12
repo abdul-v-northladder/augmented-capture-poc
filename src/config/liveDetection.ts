@@ -18,7 +18,7 @@ export const DEFAULT_ALIGNMENT_CONSTRAINTS: AlignmentConstraints = {
   insideTolerancePx: 4,
   // Phone area / capture-frame area must be between these two. Below min -> "move closer" (too small),
   // above max -> "move farther" (too large). 0.5 = the phone must fill at least half of the frame.
-  minFillRatio: 0.5,
+  minFillRatio: 0.75,
   maxFillRatio: 1.05,
   // How far the phone's centre may be from the frame's centre, as a fraction of the frame's width/height.
   // 0.2 = up to 20% off-centre is accepted. Smaller = the user must centre the phone more precisely.
@@ -82,3 +82,6 @@ export const BLUR_CONFIG = {
   /** Pause between automatic retakes, so hand shake from the shutter settles. */
   retryDelayMs: 150,
 };
+
+/** Pause after focusing on the phone, before the shutter fires, so the lens has locked. */
+export const FOCUS_SETTLE_MS = 400;

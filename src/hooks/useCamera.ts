@@ -8,6 +8,8 @@ type Options = {
   /** Post-process the raw photo (e.g. crop to the capture frame) before it is shown and reported. */
   transformPhoto?: (photo: CapturedPhoto, context: { facing: CameraFacing }) => Promise<CapturedPhoto>;
   /** Sharpness score of a (transformed) photo, higher = sharper. With `minSharpness`, blurry shots are retaken. */
+  /** Runs before every shot, e.g. to focus on the phone. Failures are ignored. */
+  prepareShot?: (camera: CameraHandle) => Promise<void>;
   scorePhoto?: (photo: CapturedPhoto) => Promise<number>;
   minSharpness?: number;
   /** Shots per capture press (default 1 = no retake). */
@@ -20,6 +22,7 @@ export function useCamera({
   initialFacing = 'back',
   onCapture,
   transformPhoto,
+  prepareShot,
   scorePhoto,
   minSharpness = 0,
   maxAttempts = 1,
@@ -65,6 +68,7 @@ export function useCamera({
       let best: { photo: CapturedPhoto; score: number } | null = null;
       for (let i = 0; i < maxAttempts; i++) {
         if (i > 0 && retryDelayMs > 0) await new Promise((r) => setTimeout(r, retryDelayMs));
+        await prepareShot?.(cameraRef.current).catch(() => undefined);
         const raw = await cameraRef.current.takePhoto();
         const result = transformPhoto ? await transformPhoto(raw, { facing }) : raw;
         const score = scorePhoto ? await scorePhoto(result) : Infinity;
@@ -84,7 +88,7 @@ export function useCamera({
     } finally {
       setIsCapturing(false);
     }
-  }, [isCapturing, onCapture, transformPhoto, scorePhoto, minSharpness, maxAttempts, retryDelayMs, facing]);
+  }, [isCapturing, onCapture, transformPhoto, prepareShot, scorePhoto, minSharpness, maxAttempts, retryDelayMs, facing]);
 
   const discardPhoto = useCallback(() => {
     setPhoto(null);

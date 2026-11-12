@@ -4,9 +4,9 @@ import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'rea
 import { useCamera } from '@/hooks/useCamera';
 import { useCaptureReadiness } from '@/hooks/useCaptureReadiness';
 import { useCanSwitchCamera, usePlatformCameraPermission } from '@/platform/camera';
-import type { CameraFacing, CapturedPhoto } from '@/types/camera';
+import type { CameraFacing, CameraHandle, CapturedPhoto } from '@/types/camera';
 import type { LiveDetectionEngine } from '@/ml/live/LiveDetectionEngine';
-import { BLUR_CONFIG } from '@/config/liveDetection';
+import { BLUR_CONFIG, FOCUS_SETTLE_MS } from '@/config/liveDetection';
 import { measureSharpness } from '@/utils/blurDetection';
 import { cropPhotoToFrame, trimPhotoToPhone } from '@/utils/photoCrop';
 import type { FrameConfiguration, FrameGeometry } from '@/types/frame';
@@ -63,6 +63,14 @@ export function CameraScreen({
     },
     [],
   );
+  // Before each shot: focus + meter exposure on the middle of the capture frame (where the phone is), then let the
+  // lens settle. Held-steady alignment already guarantees the phone is there.
+  const prepareShot = useCallback(async (camera: CameraHandle) => {
+    const g = geometryRef.current;
+    if (!g || !camera.focus) return;
+    await camera.focus({ x: g.bounds.x + g.bounds.width / 2, y: g.bounds.y + g.bounds.height / 2 });
+    await new Promise((r) => setTimeout(r, FOCUS_SETTLE_MS));
+  }, []);
   const canSwitch = useCanSwitchCamera();
   const {
     cameraRef,
@@ -83,6 +91,7 @@ export function CameraScreen({
     initialFacing,
     onCapture,
     transformPhoto,
+    prepareShot,
     scorePhoto: live ? scorePhoto : undefined,
     minSharpness: BLUR_CONFIG.minSharpness,
     maxAttempts: BLUR_CONFIG.maxAttempts,

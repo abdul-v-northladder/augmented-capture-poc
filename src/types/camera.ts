@@ -28,6 +28,8 @@ export type CapturedPhoto = {
 /** Imperative handle exposed by every platform preview implementation. */
 export type CameraHandle = {
   takePhoto: () => Promise<CapturedPhoto>;
+  /** Focus (and meter exposure) on a point in preview coordinates. Optional: web has no such control. */
+  focus?: (point: { x: number; y: number }) => Promise<void>;
 };
 
 /** Contract implemented by `platform/camera/mobile` and `platform/camera/web`. */
