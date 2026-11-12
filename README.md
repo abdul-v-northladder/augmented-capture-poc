@@ -1,6 +1,6 @@
 # Phone Detection POC
 
-A mobile app that uses the live camera to detect a mobile phone, checks that it sits correctly inside a **Smartphone** or **Flip Phone** capture frame, and enables the **Capture** button only when the phone is fully inside the frame, correctly sized and held steady. The captured photo is cropped to the frame.
+A mobile app that uses the live camera to detect a mobile phone, checks that it sits correctly inside a **Smartphone** or **Tablet** capture frame, and enables the **Capture** button only when the phone is fully inside the frame, correctly sized and held steady. The captured photo is cropped to the frame.
 
 - **Model:** YOLO26n (Ultralytics, COCO-pretrained, `cell phone` class), exported to ONNX (~10 MB, 640×640 input). No custom training yet.
 - **Stack:** Expo SDK 58, React Native 0.88, Expo Router, `react-native-vision-camera` 4, `onnxruntime-react-native`, `react-native-svg`.
@@ -117,7 +117,7 @@ ml/                          Python tooling (not bundled in the app): export, ev
 
 | What | Where |
 |---|---|
-| Frame types and dimensions (Smartphone, Flip Phones) | `src/config/deviceTypes.ts` |
+| Frame types and dimensions (Smartphone, Tablet) | `src/config/deviceTypes.ts` |
 | Confidence, size, centring and steadiness thresholds, FPS cap, banner messages | `src/config/liveDetection.ts` (every setting is commented) |
 | Which model is loaded | `src/ml/config/activeModel.ts` |
 

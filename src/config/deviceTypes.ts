@@ -11,24 +11,24 @@ export const DEVICE_TYPES: readonly DeviceTypeConfig[] = [
     frame: {
       id: 'smartphone',
       shape: 'rounded-rectangle',
-      widthRatio: 0.55,
-      heightRatio: 0.78,
-      cornerRadius: 20,
+      widthRatio: 0.7,
+      heightRatio: 0.82,
+      cornerRadius: 6,
       orientation: 'portrait',
     },
   },
   {
-    id: 'flip-phone',
-    label: 'Flip Phones',
-    // Taller and narrower than the smartphone frame.
+    id: 'tablet',
+    label: 'Tablet',
+    // Landscape frame, wider than tall (~4:3). Ratios are authored for portrait and swapped for landscape:
+    // width = heightRatio × preview width, height = widthRatio × preview height.
     frame: {
-      id: 'flip-phone',
-      shape: 'rectangle',
-      widthRatio: 0.42,
-      heightRatio: 0.85,
-      cornerRadius: 12,
+      id: 'tablet',
+      shape: 'rounded-rectangle',
+      widthRatio: 0.8,
+      heightRatio: 0.75,
+      cornerRadius: 16,
       orientation: 'portrait',
-      borderColor: '#FFD60A',
     },
   },
 ];
