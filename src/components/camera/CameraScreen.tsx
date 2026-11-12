@@ -6,7 +6,7 @@ import { useCaptureReadiness } from '@/hooks/useCaptureReadiness';
 import { useCanSwitchCamera, usePlatformCameraPermission } from '@/platform/camera';
 import type { CameraFacing, CapturedPhoto } from '@/types/camera';
 import type { LiveDetectionEngine } from '@/ml/live/LiveDetectionEngine';
-import { cropPhotoToFrame } from '@/utils/photoCrop';
+import { cropPhotoToFrame, trimPhotoToPhone } from '@/utils/photoCrop';
 import type { FrameConfiguration, FrameGeometry } from '@/types/frame';
 
 import { CameraControls } from './CameraControls';
@@ -53,7 +53,9 @@ export function CameraScreen({
   const transformPhoto = useCallback(
     async (raw: CapturedPhoto, { facing: f }: { facing: CameraFacing }) => {
       const g = geometryRef.current;
-      return g ? cropPhotoToFrame(raw, g, f) : raw;
+      if (!g) return raw;
+      // Crop to the frame, then tighten to the phone itself (edge to edge, small padding).
+      return trimPhotoToPhone(await cropPhotoToFrame(raw, g, f));
     },
     [],
   );

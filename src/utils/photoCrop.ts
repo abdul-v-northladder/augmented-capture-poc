@@ -71,3 +71,48 @@ export async function cropPhotoToFrame(
   const saved = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.95 });
   return { uri: saved.uri, width: saved.width, height: saved.height };
 }
+
+/** Extra background kept around the phone, as a fraction of the phone's own width / height. */
+export const PHONE_TRIM_PADDING = 0.01;
+
+/**
+ * Pixel rect for a normalised (0–1) detection box grown by `padding` (fraction of the box size) on every side,
+ * clamped to the photo.
+ */
+export function computePhoneTrimRect(
+  box: { x: number; y: number; width: number; height: number },
+  photo: Size,
+  padding = PHONE_TRIM_PADDING,
+): CropRect {
+  const padX = box.width * padding;
+  const padY = box.height * padding;
+  const x0 = Math.max(0, Math.floor((box.x - padX) * photo.width));
+  const y0 = Math.max(0, Math.floor((box.y - padY) * photo.height));
+  const x1 = Math.min(photo.width, Math.ceil((box.x + box.width + padX) * photo.width));
+  const y1 = Math.min(photo.height, Math.ceil((box.y + box.height + padY) * photo.height));
+  return { originX: x0, originY: y0, width: Math.max(1, x1 - x0), height: Math.max(1, y1 - y0) };
+}
+
+/**
+ * Tighten an (already frame-cropped, upright) photo to the detected phone plus a little padding, so the result is
+ * the phone edge to edge. Falls back to the input photo if no phone is found or detection fails.
+ */
+export async function trimPhotoToPhone(photo: CapturedPhoto): Promise<CapturedPhoto> {
+  try {
+    // Lazy: keeps the ML stack out of this module's import graph until a capture happens.
+    const { getPhoneDetectionService } = await import('@/ml');
+    const { detections } = await getPhoneDetectionService().detect(photo.uri);
+    if (detections.length === 0) return photo;
+    const best = detections.reduce((a, b) => (b.confidence > a.confidence ? b : a));
+
+    const rect = computePhoneTrimRect(best.boundingBox, { width: photo.width, height: photo.height });
+    const ctx = ImageManipulator.manipulate(photo.uri);
+    ctx.crop(rect);
+    const rendered = await ctx.renderAsync();
+    const saved = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.95 });
+    return { uri: saved.uri, width: saved.width, height: saved.height };
+  } catch (e) {
+    if (__DEV__) console.warn('[photoCrop] trimPhotoToPhone failed, keeping frame crop', e);
+    return photo;
+  }
+}
