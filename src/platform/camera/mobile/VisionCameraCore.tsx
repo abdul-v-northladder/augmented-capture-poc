@@ -45,6 +45,7 @@ export function VisionCameraCore({ device, isActive, onReady, onError, ref, fram
       device={device}
       isActive={isActive}
       photo
+      photoQualityBalance="quality"
       resizeMode="cover"
       // Photos follow the preview's orientation, not the physical device's. The default ('device') rotates the
       // saved photo when the phone is tilted/turned while the screen is locked to portrait, so it came out

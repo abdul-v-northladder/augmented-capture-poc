@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 type Props = {
   onCapture: () => void;
@@ -6,9 +6,11 @@ type Props = {
   disabled?: boolean;
   /** Extra reason to disable only the shutter (e.g. phone not aligned yet); Flip stays usable. */
   captureDisabled?: boolean;
+  /** Shows a spinner in place of the shutter while the photo is being taken and processed. */
+  busy?: boolean;
 };
 
-export function CameraControls({ onCapture, onSwitch, disabled, captureDisabled }: Props) {
+export function CameraControls({ onCapture, onSwitch, disabled, captureDisabled, busy }: Props) {
   return (
     <View style={styles.row}>
       <View style={styles.side} />
@@ -17,8 +19,8 @@ export function CameraControls({ onCapture, onSwitch, disabled, captureDisabled 
         accessibilityLabel="Take photo"
         disabled={disabled || captureDisabled}
         onPress={onCapture}
-        style={({ pressed }) => [styles.shutterOuter, (pressed || disabled || captureDisabled) && styles.dim]}>
-        <View style={styles.shutterInner} />
+        style={({ pressed }) => [styles.shutterOuter, (pressed || (disabled && !busy) || captureDisabled) && styles.dim]}>
+        {busy ? <ActivityIndicator size="large" color="#fff" /> : <View style={styles.shutterInner} />}
       </Pressable>
       <View style={styles.side}>
         {onSwitch && (

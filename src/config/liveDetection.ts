@@ -69,3 +69,16 @@ export const READINESS_MESSAGES: Record<CaptureReadinessState, string> = {
   ready: "Device detected. Ready to capture.",
   capturing: "Capturing image...",
 };
+
+/**
+ * Blur rejection for captured photos. Score = variance of the Laplacian of the phone crop (see `utils/blurDetection`);
+ * below `minSharpness` the photo counts as blurry. TUNE on real devices: watch the `[blur]` dev log, note scores for
+ * sharp vs. shaky shots, and set this between them. Higher = stricter.
+ */
+export const BLUR_CONFIG = {
+  minSharpness: 100,
+  /** Shots taken per capture press before giving up and showing the blur message. */
+  maxAttempts: 3,
+  /** Pause between automatic retakes, so hand shake from the shutter settles. */
+  retryDelayMs: 150,
+};

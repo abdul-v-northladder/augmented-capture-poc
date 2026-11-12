@@ -6,6 +6,8 @@ import { useCaptureReadiness } from '@/hooks/useCaptureReadiness';
 import { useCanSwitchCamera, usePlatformCameraPermission } from '@/platform/camera';
 import type { CameraFacing, CapturedPhoto } from '@/types/camera';
 import type { LiveDetectionEngine } from '@/ml/live/LiveDetectionEngine';
+import { BLUR_CONFIG } from '@/config/liveDetection';
+import { measureSharpness } from '@/utils/blurDetection';
 import { cropPhotoToFrame, trimPhotoToPhone } from '@/utils/photoCrop';
 import type { FrameConfiguration, FrameGeometry } from '@/types/frame';
 
@@ -34,6 +36,8 @@ type Props = {
   /** Extra top padding, e.g. to clear a floating header. */
   topInset?: number;
 };
+
+const scorePhoto = (p: CapturedPhoto) => measureSharpness(p.uri);
 
 export function CameraScreen({
   initialFacing,
@@ -66,6 +70,7 @@ export function CameraScreen({
     status,
     error,
     photo,
+    blurry,
     isCapturing,
     attempt,
     onReady,
@@ -74,7 +79,15 @@ export function CameraScreen({
     retry,
     capture,
     discardPhoto,
-  } = useCamera({ initialFacing, onCapture, transformPhoto });
+  } = useCamera({
+    initialFacing,
+    onCapture,
+    transformPhoto,
+    scorePhoto: live ? scorePhoto : undefined,
+    minSharpness: BLUR_CONFIG.minSharpness,
+    maxAttempts: BLUR_CONFIG.maxAttempts,
+    retryDelayMs: BLUR_CONFIG.retryDelayMs,
+  });
 
   // One geometry callback for both consumers; the engine uses it as the alignment target.
   const handleFrameGeometry = useCallback(
@@ -158,12 +171,24 @@ export function CameraScreen({
           ) : (
             <CaptureFrame config={frame} onGeometryChange={handleFrameGeometry} />
           ))}
+        {isCapturing && (
+          <View style={styles.processing}>
+            <ActivityIndicator size="large" color="#fff" />
+            <Text style={styles.processingText}>Processing photo…</Text>
+          </View>
+        )}
+        {blurry && (
+          <View pointerEvents="none" style={styles.blurBanner}>
+            <Text style={styles.blurText}>Photo was blurry. Hold the phone steady and try again.</Text>
+          </View>
+        )}
         {live && <LiveDetectionOverlay engine={live} statsTop={frameBottom} showDetectionBox={showDetectionBox} />}
       </CameraPreview>
       <CameraControls
         onCapture={handleCapture}
         onSwitch={canSwitch ? toggleFacing : undefined}
         disabled={status !== 'ready' || isCapturing}
+        busy={isCapturing}
         captureDisabled={readiness !== null && readiness !== 'ready'}
       />
     </View>
@@ -180,6 +205,24 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 16,
   },
+  processing: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  processingText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  blurBanner: {
+    position: 'absolute',
+    top: 12,
+    left: 16,
+    right: 16,
+    backgroundColor: 'rgba(200,40,40,0.9)',
+    borderRadius: 12,
+    padding: 12,
+  },
+  blurText: { color: '#fff', fontWeight: '600', textAlign: 'center' },
   photo: { flex: 1, width: '100%' },
   meta: { color: '#bbb', textAlign: 'center', paddingTop: 8 },
   title: { color: '#fff', fontSize: 20, fontWeight: '700' },
