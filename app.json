@@ -58,7 +58,15 @@
       ],
       "onnxruntime-react-native",
       "./plugins/withOnnxruntimeAndroidPackage",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "-keep class com.mrousavy.camera.** { *; }\n-keep class com.worklets.** { *; }\n-keep class com.visioncameraresizeplugin.** { *; }\n-keep class ai.onnxruntime.** { *; }"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

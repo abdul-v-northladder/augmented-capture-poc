@@ -1,0 +1,51 @@
+# Files EAS Build does NOT upload. When this file exists, EAS uses it instead of .gitignore.
+# It is .gitignore minus the model line, so the git-ignored model IS uploaded and bundled into the APK.
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android
+
+# ML: python env and source weights are not needed in the cloud build
+/ml/.venv/
+/ml/models/
+
+# NOT ignored on purpose (differs from .gitignore): /assets/models/*.onnx  (required by src/ml/config/yolo26nAsset.ts)
+/public/ort/
