@@ -51,7 +51,7 @@ export const DEFAULT_READINESS_CONFIG: ReadinessConfig = {
   // A detection older than this (ms) is ignored (treated as "no phone"), so Capture is never allowed on old data.
   maxStaleMs: 1500,
   // The AVERAGE confidence over the hold must reach this (0-1). A single high-confidence false frame cannot
-  // unlock Capture; a real phone hovering around 0.75-0.9 can.
+  // unlock Capture; a real phone hovering around 0.6-0.9 can.
   minMeanConfidence: 0.6,
   // Detector flicker forgiven without restarting the hold: this many frames in a row with no phone or a too-low
   // confidence. Position problems (outside / too small / too large / off-centre) are never forgiven.

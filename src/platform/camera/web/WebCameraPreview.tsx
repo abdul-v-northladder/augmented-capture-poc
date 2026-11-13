@@ -21,6 +21,7 @@ export function describeCameraError(e: unknown): string {
 
 export function WebCameraPreview({ facing, onReady, onError, ref, liveEngine }: PlatformCameraPreviewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   useWebLiveFrames(videoRef, liveEngine, facing);
   // Keep latest callbacks without restarting the stream when parents re-render.
   const callbacks = useRef({ onReady, onError });
@@ -34,6 +35,29 @@ export function WebCameraPreview({ facing, onReady, onError, ref, liveEngine }: 
       takePhoto: async () => {
         const video = videoRef.current;
         if (!video || video.videoWidth === 0) throw new Error('Camera is not ready yet.');
+
+        // Full-sensor still where supported (Chrome/Android). Falls through to the canvas path otherwise.
+        const track = streamRef.current?.getVideoTracks()[0];
+        const ImageCaptureCtor = (globalThis as any).ImageCapture;
+        if (track && ImageCaptureCtor && track.readyState === 'live') {
+          try {
+            const blob: Blob = await new ImageCaptureCtor(track).takePhoto();
+            const bitmap = await createImageBitmap(blob);
+            const { width, height } = bitmap;
+            bitmap.close?.();
+            const uri = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = () => reject(reader.error);
+              reader.readAsDataURL(blob);
+            });
+            // The still is not mirrored; the front-camera preview is, so report it as unmirrored like native.
+            return { uri, width, height, isMirrored: false };
+          } catch {
+            // fall back to the video-frame capture below
+          }
+        }
+
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -66,13 +90,19 @@ export function WebCameraPreview({ facing, onReady, onError, ref, liveEngine }: 
       }
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: facing === 'back' ? 'environment' : 'user' } },
+          video: {
+            facingMode: { ideal: facing === 'back' ? 'environment' : 'user' },
+            // Without these, mobile browsers default to ~640x480. "ideal" falls back to the best available mode.
+            width: { ideal: 4096 },
+            height: { ideal: 2160 },
+          },
           audio: false,
         });
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
           return;
         }
+        streamRef.current = stream;
         const video = videoRef.current;
         if (!video) return;
         video.srcObject = stream;
@@ -85,6 +115,7 @@ export function WebCameraPreview({ facing, onReady, onError, ref, liveEngine }: 
 
     return () => {
       cancelled = true;
+      streamRef.current = null;
       stream?.getTracks().forEach((t) => t.stop());
     };
   }, [facing]);

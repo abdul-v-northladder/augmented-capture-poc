@@ -7,8 +7,8 @@ import type { CaptureReadinessState } from '@/utils/captureReadiness';
 
 /** Banner colour per state: green = good to go, orange = nearly, red = fix the position, dark = neutral. */
 const BANNER_COLORS: Record<CaptureReadinessState, string> = {
-  searching: 'rgba(0,0,0,0.65)',
-  detected: 'rgba(0,0,0,0.65)',
+  searching: 'rgb(252, 252, 252)',
+  detected: 'rgb(255, 255, 255)',
   too_far: '#FF453A',
   too_close: '#FF453A',
   outside_frame: '#FF453A',
@@ -24,7 +24,6 @@ const BANNER_COLORS: Record<CaptureReadinessState, string> = {
 export function LiveDetectionOverlay({
   engine,
   statsTop,
-  showDetectionBox = false,
 }: {
   engine: LiveDetectionEngine;
   /** Y (preview px) where the stats line starts, e.g. just below the capture frame. Defaults to the bottom edge. */
@@ -45,29 +44,13 @@ export function LiveDetectionOverlay({
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {showDetectionBox && s.phone && (
-        <View
-          style={[
-            styles.box,
-            {
-              left: s.phone.box.x,
-              top: s.phone.box.y,
-              width: s.phone.box.width,
-              height: s.phone.box.height,
-              borderColor: s.alignment.valid ? '#30D158' : '#FF453A',
-            },
-          ]}>
-          <Text style={[styles.tag, { backgroundColor: s.alignment.valid ? '#30D158' : '#FF453A' }]}>
-            {s.phone.className} {(s.phone.confidence * 100).toFixed(0)}%
-          </Text>
-        </View>
-      )}
+   
       <View style={styles.bannerWrap}>
         <Text
           style={[
             styles.banner,
             {
-              backgroundColor: bannerColor,
+              color: bannerColor,
             },
           ]}
         >
@@ -75,19 +58,24 @@ export function LiveDetectionOverlay({
         </Text>
         {s.status === 'error' && s.error ? <Text style={styles.debug}>{s.error}</Text> : null}
       </View>
-      {s.status === 'running' && (
+      {/* {s.status === 'running' && (
         <View style={[styles.statsWrap, statsTop === undefined ? { bottom: 12 } : { top: statsTop + 8 }]}>
           <Text style={styles.debug}>
             {s.inferenceMs.toFixed(0)} ms · {s.fps.toFixed(1)} fps
             {s.source ? ` · frame ${s.source.width}×${s.source.height} rot ${s.source.rotation}°` : ''}
           </Text>
-          {/* Diagnostics: what the model sees besides the phone, and the phone's own score. */}
           <Text style={styles.debug}>
             phone {s.phone ? s.phone.confidence.toFixed(2) : '–'}
             {s.others.length ? ` · also ${s.others.map((o) => `${o.className} ${o.confidence.toFixed(2)}`).join(', ')}` : ''}
           </Text>
+          <Text style={styles.debug}>
+            {s.readiness} · {s.alignment.valid ? 'ok' : s.alignment.reasons.join(',')}
+            {s.alignment.metrics
+              ? ` · fill ${s.alignment.metrics.fillRatio.toFixed(2)} off ${s.alignment.metrics.centerOffsetX.toFixed(2)}/${s.alignment.metrics.centerOffsetY.toFixed(2)}`
+              : ''}
+          </Text>
         </View>
-      )}
+      )} */}
     </View>
   );
 }
@@ -97,7 +85,7 @@ const styles = StyleSheet.create({
   tag: { position: 'absolute', top: -22, left: -3, color: '#000', fontSize: 12, fontWeight: '700', paddingHorizontal: 6, paddingVertical: 2 },
   bannerWrap: {
     position: 'absolute',
-    top: 12,
+    top: 0,
     left: 12,
     right: 12,
     alignItems: 'center',
@@ -105,11 +93,10 @@ const styles = StyleSheet.create({
   },
   banner: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
     paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingVertical: 3,
     overflow: 'hidden',
     textAlign: 'center',
   },

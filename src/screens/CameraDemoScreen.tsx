@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CameraScreen } from '@/components/camera/CameraScreen';
@@ -15,7 +14,7 @@ export default function CameraDemoScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }} edges={['top', 'bottom']}>
       <DeviceTypeSelector deviceTypes={deviceTypes} selectedId={selectedId} onSelect={select} />
-      <CameraScreen frame={deviceType.frame} live={live} showDetectionBox={Platform.OS === 'web'} />
+      <CameraScreen frame={deviceType.frame} live={live} />
     </SafeAreaView>
   );
 }

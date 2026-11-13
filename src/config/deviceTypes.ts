@@ -12,7 +12,7 @@ export const DEVICE_TYPES: readonly DeviceTypeConfig[] = [
       id: 'smartphone',
       shape: 'rounded-rectangle',
       widthRatio: 0.7,
-      heightRatio: 0.82,
+      heightRatio: 0.9,
       cornerRadius: 6,
       orientation: 'portrait',
     },
